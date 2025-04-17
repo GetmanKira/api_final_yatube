@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from rest_framework.relations import SlugRelatedField
 from django.contrib.auth.models import User
 
@@ -35,24 +35,29 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор подписок."""
     user = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault())
+        default=serializers.CurrentUserDefault(),
+        slug_field='username'
+    )
     following = serializers.SlugRelatedField(
-        slug_field='username',
-        queryset=User.objects.all())
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
 
     class Meta:
-        model = Follow
         fields = ('user', 'following')
-        """частично убрала инфу"""
+        model = Follow
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'following')
+            )
+        ]
 
     def validate_following(self, value):
-        user = self.context.get('request').user
-        if user == value:
+        if value == self._context['request'].user:
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя'
+                "На себя подписываться безсмысленно!"
             )
         return value
