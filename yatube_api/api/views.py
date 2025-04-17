@@ -8,6 +8,8 @@ from rest_framework.permissions import (
 )
 from rest_framework.pagination import LimitOffsetPagination
 
+from rest_framework.permissions import BasePermission
+
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     PostSerializer,
@@ -18,6 +20,10 @@ from .serializers import (
 from posts.models import Post, Comment, Group, Follow
 
 User = get_user_model()
+
+class IsAuthorOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.author == request.user or request.method in ['GET', 'HEAD', 'OPTIONS']
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -66,4 +72,10 @@ class FollowViewSet(ReadOrCreateFollowForUser):
         return Follow.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        following_user = get_object_or_404(
+            User, username=self.request.data['following'])
+        if Follow.objects.filter(
+                user=self.request.user, following=following_user).exists():
+            raise serializer.ValidationError(
+                "Вы уже подписаны на этого пользователя.")
+        serializer.save(user=self.request.user, following=following_user)
