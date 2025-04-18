@@ -6,15 +6,17 @@
 Чтобы развернуть проект на локальной машине, выполните следующие шаги:
 
 ### Клонируйте репозиторий:
+```
    git clone https://github.com/GetmanKira/api_final_yatube.git
    cd api_final_yatube
    cd yatube_api
+```
 ### Cоздать и активировать виртуальное окружение:
-
+```
 python -m venv env
 source venv/Scripts/activate
 python -m pip install --upgrade pip
-
+```
 ### Установите необходимые зависимости:
 pip install -r requirements.txt
 
@@ -22,21 +24,24 @@ pip install -r requirements.txt
 python manage.py migrate
 
 ### Запустите сервер:
+```
 python manage.py runserver
 
 Теперь проект доступен по адресу http://127.0.0.1:8000/.
-
+```
 ## Примеры запросов к API
 
 ### Создание новой публикации
 POST /api/v1/posts/
 
 Тело запроса
+```
 {
   "text": "string",
   "image": "string",
   "group": 0
 }
+```
 Пример ответа
 201 Успешное выполнение запроса:
 ```
@@ -70,8 +75,7 @@ GET /api/v1/posts/{id}/
   "group": 0
 }
 ```
+```
 404 Ошибка: попытка запроса несуществующей публикации.
-
-  }
-]
 404 Ошибка: получение
+```
